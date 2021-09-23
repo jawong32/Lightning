@@ -62,12 +62,38 @@ void setup() {
   noFill();
 }
 
-void generate() {
-  Vector<Coordinate> coordinates = new Vector<Coordinate>();
+Coordinate[] lightningCoords(Coordinate start, Coordinate end) {
+  int segments = (int) (Math.random() * 20 + 10);
+  int length = Math.abs(start.x - end.x);
+  Coordinate[] coords = new Coordinate[segments];
+  for (int i = 0; i < segments; i++) {
+    coords[i + 1] = new Coordinate();
+  }
+  return new Coordinate[] {};
+}
+
+Coordinate pickSide() {
+  switch ((int) (Math.random() * 4)) {
+  case 0:
+    return new Coordinate(randNum(), 0);
+  case 1:
+    return new Coordinate(800, randNum());
+  case 2:
+    return new Coordinate(randNum(), 800);
+  default:
+    return new Coordinate(0, randNum());
+  }
+}
+
+int randNum() {
+  return (int) (Math.random() * 801);
 }
 
 void mousePressed() {
-  QUADRANTS.lightning();
+  Coordinate[] coords = lightningCoords(pickSide(), new Coordinate(mouseX, mouseY));
+  for (int i = 0; i < coords.length; i++) {
+    line(coords[i - 1].x, coords[i - 1].y, coords[i].x, coords[i].y);
+  }
 }
 
 int coordinate() {
