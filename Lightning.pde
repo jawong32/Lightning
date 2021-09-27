@@ -1,101 +1,71 @@
-import java.util.Vector;
-
-class Quadrants {
-  ArrayList<Quadrant> list = new ArrayList<Quadrant>();
-  int length;
-  Quadrants(Quadrant... quads) {
-    for (Quadrant quad : quads) {
-      this.list.add(quad);
-    }
-    this.length = this.list.size();
-  }
-  private void lightning() {
-    for (Quadrant quad : this.list) {
-      quad.lightning();
-    }
-  }
-}
-
-class Quadrant {
-  int startX, startY, stopX, stopY;
-  Quadrant(int startX, int startY, int stopX, int stopY) {
-    this.startX = startX;
-    this.startY = startY;
-    this.stopX = stopX;
-    this.stopY = stopY;
-  }
-  private void lightning() {
-    background(0, 255, 0);
-    int segments = (int) (Math.random() * 10 + 5);
-    int segLen = mouseX / segments;
-    int ogX = mouseX, ogY = mouseY;
-    for (int i = 0; i < segments; i++) {
-      int newX = ogX - segLen, newY = ogY + coordinate();
-      line(ogX, ogY, newX, newY);
-      ogX = newX;
-      ogY = newY;
-    }
-  }
-}
-
 class Coordinate {
   int x, y;
+
   Coordinate(int x, int y) {
-    this.x = x; 
+    this.x = x;
     this.y = y;
+  }
+
+  Coordinate() {
+    this((int) (Math.random() * 2), (int) (Math.random() * 2));
+  }
+
+  int randNum(int range, int min) {
+    return (int) (Math.random() * (range + 1)) + min;
+  }
+
+  Coordinate next(Coordinate end) {
+    if (end.x == 0) {
+      this.x += this.randNum(90, -20);
+    } else {
+      this.x -= this.randNum(90, -20);
+    }
+    if (end.y == 0) {
+      this.y += this.randNum(90, -20);
+    } else {
+      this.y -= this.randNum(90, -20);
+    }
+    return this;
   }
 }
 
-void draw() {
-}
-
-Quadrant QUAD1 = new Quadrant(0, 0, 400, 400);
-Quadrant QUAD2 = new Quadrant(400, 0, 800, 400);
-Quadrant QUAD3 = new Quadrant(0, 400, 400, 800);
-Quadrant QUAD4 = new Quadrant(400, 400, 800, 800);
-Quadrants QUADRANTS = new Quadrants(QUAD1, QUAD2, QUAD3, QUAD4);
+ArrayList<Coordinate> points = new ArrayList<Coordinate>();
 
 void setup() {
   size(800, 800);
-  strokeWeight(10);
-  background(0, 255, 0);
-  noFill();
+  strokeWeight(3);
+  background(0);
+  frameRate(300);
 }
 
-Coordinate[] lightningCoords(Coordinate start, Coordinate end) {
-  int segments = (int) (Math.random() * 20 + 10);
-  int length = Math.abs(start.x - end.x);
-  Coordinate[] coords = new Coordinate[segments];
-  for (int i = 0; i < segments; i++) {
-    coords[i + 1] = new Coordinate();
+void draw() {
+  background(0);
+  if (mousePressed) {
+    bolts();
+    points.add(new Coordinate(mouseX, mouseY));
   }
-  return new Coordinate[] {};
-}
-
-Coordinate pickSide() {
-  switch ((int) (Math.random() * 4)) {
-  case 0:
-    return new Coordinate(randNum(), 0);
-  case 1:
-    return new Coordinate(800, randNum());
-  case 2:
-    return new Coordinate(randNum(), 800);
-  default:
-    return new Coordinate(0, randNum());
+  for (Coordinate p : points) {
+    point(p.x, p.y);
   }
 }
 
-int randNum() {
-  return (int) (Math.random() * 801);
+void keyPressed() {
+  if (key == ' ') points.clear();
 }
 
-void mousePressed() {
-  Coordinate[] coords = lightningCoords(pickSide(), new Coordinate(mouseX, mouseY));
-  for (int i = 0; i < coords.length; i++) {
-    line(coords[i - 1].x, coords[i - 1].y, coords[i].x, coords[i].y);
+void lightning(Coordinate start, Coordinate end, int count) {
+  if (count == 0) {
+    return;
   }
+  Coordinate next = new Coordinate(start.x, start.y).next(end);
+  stroke(255);
+  line(start.x, start.y, next.x, next.y);
+  lightning(next, end, count - 1);
 }
 
-int coordinate() {
-  return Math.random() > 0.5 ? (int) (Math.random() * 100) : (int) (Math.random() * -100);
+void bolts() {
+  int count = (int) (Math.random() * 10) + 3;
+  for (int i = 0; i < count; i++) {
+    lightning(new Coordinate(mouseX, mouseY), new Coordinate(), (int) (Math.random() * 50) + 10);
+  }
 }
